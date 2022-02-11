@@ -3,7 +3,6 @@ MAINTAINER Madison Bahmer <madison.bahmer@istresearch.com>
 
 # os setup
 RUN apt-get update && apt-get -y install \
-  python-lxml \
   build-essential \
   libssl-dev \
   libffi-dev \
@@ -32,4 +31,5 @@ COPY docker/run_docker_tests.sh /usr/src/app/run_docker_tests.sh
 # set up environment variables
 
 # run the spider
-CMD ["scrapy", "runspider", "crawling/spiders/link_spider.py"]
+CMD ["scrapy", "runspider", "crawling/spiders/manager.py"]
+# CMD ["python"]

@@ -11,10 +11,10 @@ services:
     environment:
       - LOG_STDOUT=False
       - LOG_JSON=True
+      - LOG_LEVEL=DEBUG
     depends_on:
       - kafka
       - redis
-    restart: always
   redis_monitor:
     image: istresearch/scrapy-cluster:redis-monitor-dev
     volumes:
@@ -22,23 +22,27 @@ services:
     environment:
       - LOG_STDOUT=False
       - LOG_JSON=True
+      - LOG_LEVEL=DEBUG
     depends_on:
       - kafka
       - redis
       - zookeeper
-    restart: always
   crawler:
-    image: istresearch/scrapy-cluster:crawler-dev
+    image: carnie/scrapy-cluster:crawler-dev
+    build:
+      context: ..
+      dockerfile: docker/crawler/Dockerfile.py3
     volumes:
       - logs:/usr/src/app/logs
     environment:
       - SC_LOG_STDOUT=False
       - SC_LOG_JSON=True
+      - LOG_LEVEL=DEBUG
     depends_on:
       - kafka
       - redis
       - zookeeper
-    restart: always
+      - mongo
   rest:
     image: istresearch/scrapy-cluster:rest-dev
     volumes:
@@ -46,23 +50,21 @@ services:
     depends_on:
       - kafka
       - redis
-    restart: always
     ports:
       - "5343:5343"
     environment:
       - LOG_STDOUT=False
       - LOG_JSON=True
+      - LOG_LEVEL=DEBUG
   redis:
     image: redis
     ports:
       - "6379"
-    restart: always
     # command: redis-server --requirepass redispassword
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
       - "2181:2181"
-    restart: always
   kafka:
     image: wurstmeister/kafka
     ports:
@@ -75,16 +77,18 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - zookeeper
-    restart: always
+  mongo:
+    image: "mongo:bionic"
+    ports:
+    - "27017:27017"
   elasticsearch:
-    image: elasticsearch:5.2
-    command: elasticsearch -E network.host=0.0.0.0 -E discovery.zen.minimum_master_nodes=1
+    image: elasticsearch:7.16.3
+    command: elasticsearch -E network.host=0.0.0.0 -E discovery.type=single-node
     ports:
       - "9200:9200"
       - "9300:9300"
-    restart: always
   logstash:
-    image: logstash:5.2
+    image: logstash:7.16.3
     command: logstash -f /etc/logstash/conf.d/logstash.conf
     volumes:
       - ./scrapy-cluster-logstash-docker.conf:/etc/logstash/conf.d/logstash.conf
@@ -94,14 +98,12 @@ services:
       - "5000:5000"
     links:
       - elasticsearch
-    restart: always
   kibana:
-    image: kibana:5.2
+    image: kibana:7.16.3
     ports:
       - "5601:5601"
     links:
       - elasticsearch
-    restart: always
 
 volumes:
   logs:

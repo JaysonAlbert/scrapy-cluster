@@ -5,10 +5,12 @@
 from scrapy import Item, Field
 
 
-class RawResponseItem(Item):
+class BaseItem(Item):
     appid = Field()
     crawlid = Field()
     url = Field()
+
+class RawResponseItem(BaseItem):
     response_url = Field()
     status_code = Field()
     status_msg = Field()
@@ -20,3 +22,40 @@ class RawResponseItem(Item):
     success = Field()
     exception = Field()
     encoding = Field()
+
+class Manager(BaseItem):
+    _id = Field()
+    name = Field()
+    appointment_date = Field()
+    introduction = Field()
+    company = Field()
+    fund_asset_size = Field()
+    sex = Field()
+    funds = Field()
+    best_return = Field()
+
+    image_urls = Field()
+    picture = Field()
+
+    @staticmethod
+    def get_collection_name():
+        return 'manager'
+
+
+class Fund(RawResponseItem):
+    _id = Field()
+    code = Field()
+    name = Field()
+    type = Field()
+    start_date = Field()
+    end_date = Field()
+    duty_days = Field()
+    duty_return = Field()
+    average = Field()
+    rank = Field()
+    manager = Field()
+    company = Field()
+
+    @staticmethod
+    def get_collection_name():
+        return 'fund'

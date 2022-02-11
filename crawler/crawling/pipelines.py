@@ -1,4 +1,6 @@
+from asyncio.log import logger
 from builtins import object
+from sqlalchemy import true
 # -*- coding: utf-8 -*-
 
 # Define your item pipelines here
@@ -14,6 +16,9 @@ from kafka import KafkaProducer
 from kafka.errors import KafkaTimeoutError
 from crawling.items import RawResponseItem
 from scutils.log_factory import LogFactory
+
+import pymongo
+from pymongo.errors import DuplicateKeyError
 
 
 class LoggingBeforePipeline(object):
@@ -219,3 +224,36 @@ class KafkaPipeline(object):
         self.logger.info("Closing Kafka Pipeline")
         self.producer.flush()
         self.producer.close(timeout=10)
+
+class MongoPipeline(object):
+
+    def __init__(self, mongo_uri, mongo_db):
+        self.mongo_uri = mongo_uri
+        self.mongo_db = mongo_db
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(
+            mongo_uri=crawler.settings.get('MONGO_URI'),
+            mongo_db=crawler.settings.get('MONGO_DATABASE')
+        )
+
+    def open_spider(self, spider):
+        self.client = pymongo.MongoClient(self.mongo_uri)
+        self.db = self.client[self.mongo_db]
+
+    def close_spider(self, spider):
+        self.client.close()
+
+    def process_item(self, item, spider):
+        try:
+            collection = item.get_collection_name()
+            if item['_id']:
+                self.db[collection].replace_one({'_id':item['_id']},dict(item), upsert=True)
+            else:
+                self.db[collection].insert_one(dict(item))
+        except DuplicateKeyError as e:
+            pass
+        except Exception as e:
+            self.logger.error('保存数据到mongodb失败', e)
+        return item

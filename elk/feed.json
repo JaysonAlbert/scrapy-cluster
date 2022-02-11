@@ -1,0 +1,26 @@
+python kafka_monitor.py feed  '{
+    "url": "http://fundf10.eastmoney.com/jjjl_000256.html",
+    "appid": "crawler",
+    "crawlid": "j2jjl_122812",
+    "spiderid": "manager1"
+}'
+
+
+{
+    "allowed_domains": null,
+    "allow_regex": null,
+    "crawlid": "manager",
+    "url": "http:\/\/fundf10.eastmoney.com\/jjjl_000256.html",
+    "expires": 0,
+    "ts": 1644241157.0189669132,
+    "priority": 1,
+    "deny_regex": null,
+    "cookie": null,
+    "attrs": null,
+    "appid": "crawler",
+    "spiderid": "link",
+    "useragent": null,
+    "deny_extensions": null,
+    "domain_max_pages": null,
+    "maxdepth": 0
+}

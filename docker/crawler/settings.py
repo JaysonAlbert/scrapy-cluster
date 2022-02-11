@@ -31,6 +31,9 @@ ZOOKEEPER_ASSIGN_PATH = '/scrapy-cluster/crawler/'
 ZOOKEEPER_ID = 'all'
 ZOOKEEPER_HOSTS = os.getenv('ZOOKEEPER_HOSTS', 'zookeeper:2181')
 
+MONGO_URI = os.getenv('MONGO_URI', 'mongodb://mongo:27017')
+MONGO_DATABASE = os.getenv('MONGO_DATABASE', 'fundmanager')
+
 PUBLIC_IP_URL = 'http://ip.42.pl/raw'
 IP_ADDR_REGEX = '(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'
 
@@ -146,12 +149,16 @@ NEWSPIDER_MODULE = 'crawling.spiders'
 SCHEDULER = "crawling.distributed_scheduler.DistributedScheduler"
 
 
+IMAGES_STORE = 'images'
+IMAGES_RESULT_FIELD = 'picture'
 
 # Store scraped item in redis for post-processing.
 ITEM_PIPELINES = {
+    'crawling.pipelines.MongoPipeline': 200,
     'crawling.pipelines.KafkaPipeline': 100,
-    'crawling.pipelines.LoggingBeforePipeline': 1,
+    'scrapy.pipelines.images.ImagesPipeline': 1
 }
+
 
 SPIDER_MIDDLEWARES = {
     # disable built-in DepthMiddleware, since we do our own
