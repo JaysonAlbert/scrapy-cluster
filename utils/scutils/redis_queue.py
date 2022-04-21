@@ -41,7 +41,7 @@ class Base(object):
         if self.encoding.__name__ == 'pickle':
             return self.encoding.dumps(item, protocol=-1).decode('latin1')
         else:
-            return self.encoding.dumps(item)
+            return self.encoding.dumps(item, reject_bytes=False)
 
     def _decode_item(self, encoded_item):
         '''
